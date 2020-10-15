@@ -19,17 +19,16 @@ import com.hazz.kotlinmvp.glide.GlideApp
 import com.hazz.kotlinmvp.mvp.contract.VideoDetailContract
 import com.hazz.kotlinmvp.mvp.model.bean.HomeBean
 import com.hazz.kotlinmvp.mvp.presenter.VideoDetailPresenter
-import com.hazz.kotlinmvp.showToast
 import com.hazz.kotlinmvp.ui.adapter.VideoDetailAdapter
 import com.hazz.kotlinmvp.utils.CleanLeakUtils
 import com.hazz.kotlinmvp.utils.StatusBarUtil
 import com.hazz.kotlinmvp.utils.WatchHistoryUtils
-import com.hazz.kotlinmvp.view.VideoListener
 import com.orhanobut.logger.Logger
-import com.scwang.smartrefresh.header.MaterialHeader
+import com.scwang.smart.refresh.header.MaterialHeader
+import com.shuyu.gsyvideoplayer.GSYVideoManager
+import com.shuyu.gsyvideoplayer.listener.GSYSampleCallBack
 import com.shuyu.gsyvideoplayer.listener.LockClickListener
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils
-import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer
 import kotlinx.android.synthetic.main.activity_video_detail.*
 import java.text.SimpleDateFormat
@@ -132,37 +131,23 @@ class VideoDetailActivity : BaseActivity(), VideoDetailContract.View {
                 .into(imageView)
         mVideoView.thumbImageView = imageView
 
-        mVideoView.setStandardVideoAllCallBack(object : VideoListener {
-
-            override fun onPrepared(url: String, vararg objects: Any) {
+        mVideoView.setVideoAllCallBack(object : GSYSampleCallBack() {
+            override fun onPrepared(url: String?, vararg objects: Any?) {
                 super.onPrepared(url, *objects)
                 //开始播放了才能旋转和全屏
                 orientationUtils?.isEnable = true
                 isPlay = true
             }
 
-            override fun onAutoComplete(url: String, vararg objects: Any) {
-                super.onAutoComplete(url, *objects)
-                Logger.d("***** onAutoPlayComplete **** ")
-            }
-
-            override fun onPlayError(url: String, vararg objects: Any) {
-                super.onPlayError(url, *objects)
-                showToast("播放失败")
-            }
-
-            override fun onEnterFullscreen(url: String, vararg objects: Any) {
-                super.onEnterFullscreen(url, *objects)
-                Logger.d("***** onEnterFullscreen **** ")
-            }
-
-            override fun onQuitFullscreen(url: String, vararg objects: Any) {
+            override fun onQuitFullscreen(url: String?, vararg objects: Any?) {
                 super.onQuitFullscreen(url, *objects)
                 Logger.d("***** onQuitFullscreen **** ")
                 //列表返回的样式判断
                 orientationUtils?.backToProtVideo()
             }
+
         })
+
         //设置返回按键功能
         mVideoView.backButton.setOnClickListener({ onBackPressed() })
         //设置全屏按键功能
@@ -293,11 +278,11 @@ class VideoDetailActivity : BaseActivity(), VideoDetailContract.View {
      */
     override fun onBackPressed() {
         orientationUtils?.backToProtVideo()
-        if (StandardGSYVideoPlayer.backFromWindowFull(this))
+        if (GSYVideoManager.backFromWindowFull(this))
             return
         //释放所有
-        mVideoView.setStandardVideoAllCallBack(null)
-        GSYVideoPlayer.releaseAllVideos()
+        mVideoView.setVideoAllCallBack(null)
+        GSYVideoManager.releaseAllVideos()
         if (isTransition && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) run {
             super.onBackPressed()
         } else {
@@ -321,7 +306,7 @@ class VideoDetailActivity : BaseActivity(), VideoDetailContract.View {
     override fun onDestroy() {
         CleanLeakUtils.fixInputMethodManagerLeak(this)
         super.onDestroy()
-        GSYVideoPlayer.releaseAllVideos()
+        GSYVideoManager.releaseAllVideos()
         orientationUtils?.releaseListener()
         mPresenter.detachView()
     }

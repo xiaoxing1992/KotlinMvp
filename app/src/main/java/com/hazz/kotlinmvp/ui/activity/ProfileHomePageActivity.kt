@@ -1,6 +1,7 @@
 package com.hazz.kotlinmvp.ui.activity
 
 import android.annotation.SuppressLint
+import android.content.res.Resources
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.NestedScrollView
 import android.webkit.WebView
@@ -9,9 +10,8 @@ import com.hazz.kotlinmvp.R
 import com.hazz.kotlinmvp.base.BaseActivity
 import com.hazz.kotlinmvp.utils.CleanLeakUtils
 import com.hazz.kotlinmvp.utils.StatusBarUtil
-import com.scwang.smartrefresh.layout.api.RefreshHeader
-import com.scwang.smartrefresh.layout.listener.SimpleMultiPurposeListener
-import com.scwang.smartrefresh.layout.util.DensityUtil
+import com.scwang.smart.refresh.layout.api.RefreshHeader
+import com.scwang.smart.refresh.layout.simple.SimpleMultiListener
 import kotlinx.android.synthetic.main.activity_profile_homepage.*
 import java.util.*
 
@@ -38,14 +38,8 @@ class ProfileHomePageActivity : BaseActivity() {
         StatusBarUtil.darkMode(this)
         StatusBarUtil.setPaddingSmart(this, toolbar)
 
-        refreshLayout.setOnMultiPurposeListener(object : SimpleMultiPurposeListener() {
-            override fun onHeaderPulling(header: RefreshHeader?, percent: Float, offset: Int, bottomHeight: Int, extendHeight: Int) {
-                mOffset = offset / 2
-                parallax.translationY = (mOffset - mScrollY).toFloat()
-                toolbar.alpha = 1 - Math.min(percent, 1f)
-            }
-
-            override fun onHeaderReleasing(header: RefreshHeader?, percent: Float, offset: Int, bottomHeight: Int, extendHeight: Int) {
+        refreshLayout.setOnMultiListener(object : SimpleMultiListener() {
+            override fun onHeaderMoving(header: RefreshHeader?, isDragging: Boolean, percent: Float, offset: Int, headerHeight: Int, maxDragHeight: Int) {
                 mOffset = offset / 2
                 parallax.translationY = (mOffset - mScrollY).toFloat()
                 toolbar.alpha = 1 - Math.min(percent, 1f)
@@ -53,10 +47,10 @@ class ProfileHomePageActivity : BaseActivity() {
         })
         scrollView.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
             private var lastScrollY = 0
-            private val h = DensityUtil.dp2px(170f)
+            private val h = dp2px(170f)
             private val color = ContextCompat.getColor(applicationContext, R.color.colorPrimary) and 0x00ffffff
             override fun onScrollChange(v: NestedScrollView, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
-                var tScrollY= scrollY
+                var tScrollY = scrollY
                 if (lastScrollY < h) {
                     tScrollY = Math.min(h, tScrollY)
                     mScrollY = if (tScrollY > h) h else tScrollY
@@ -86,10 +80,20 @@ class ProfileHomePageActivity : BaseActivity() {
             override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)
                 refreshLayout.finishRefresh()
-                view.loadUrl(String.format(Locale.CHINA, "javascript:document.body.style.paddingTop='%fpx'; void 0", DensityUtil.px2dp(mWebView.paddingTop.toFloat())))
+                view.loadUrl(String.format(Locale.CHINA, "javascript:document.body.style.paddingTop='%fpx'; void 0", px2dp(mWebView.paddingTop.toFloat())))
             }
         }
 
+    }
+
+    fun px2dp(pxValue: Float): Int {
+        val scale = Resources.getSystem().displayMetrics.density
+        return (pxValue / scale + 0.5f).toInt()
+    }
+
+    fun dp2px(dpValue: Float): Int {
+        val scale = Resources.getSystem().displayMetrics.density
+        return (dpValue * scale + 0.5f).toInt()
     }
 
     override fun start() {

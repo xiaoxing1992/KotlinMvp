@@ -108,12 +108,12 @@ dependencies {
         exclude group: 'glide-parent'
     }
     //smartRefreshLayout 下拉刷新
-    implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.0.3'
-    implementation 'com.scwang.smartrefresh:SmartRefreshHeader:1.0.3'
+    implementation  'com.scwang.smart:refresh-layout-kernel:2.0.1'      //核心必须依赖
+    implementation  'com.scwang.smart:refresh-header-material:2.0.1'    //谷歌刷新头
     //Banner
     implementation 'cn.bingoogolapple:bga-banner:2.2.4@aar'
     // 视屏播放器
-    implementation 'com.shuyu:GSYVideoPlayer:2.1.1'
+    implementation 'com.shuyu:GSYVideoPlayer:6.0.3'
     //Logger
     implementation 'com.orhanobut:logger:2.1.1'
     //Google开源的一个布局控件

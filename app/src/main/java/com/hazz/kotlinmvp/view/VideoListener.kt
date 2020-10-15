@@ -1,12 +1,12 @@
 package com.hazz.kotlinmvp.view
 
-import com.shuyu.gsyvideoplayer.listener.StandardVideoAllCallBack
+import com.shuyu.gsyvideoplayer.listener.VideoAllCallBack
 
 /**
  * Created by xuhao on 2017/11/27.
  * desc: VideoAllCallBack 回调
  */
-interface VideoListener : StandardVideoAllCallBack {
+interface VideoListener : VideoAllCallBack {
 
     //加载成功，objects[0]是title，object[1]是当前所处播放器（全屏或非全屏）
     override fun onPrepared(url: String, vararg objects: Any) {
